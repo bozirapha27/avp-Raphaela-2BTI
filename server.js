@@ -57,6 +57,47 @@ app.post("/alunos", (req, res) => {
   });
 });
 
+app.patch("/alunos/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const { nome, turma } = req.body;
+
+  const aluno = alunos.find((aluno) => aluno.id === id);
+
+  if (!aluno) {
+    return res.status(404).json({
+      message: "Aluno não encontrado"
+    });
+  }
+
+  if (nome) {
+    aluno.nome = nome;
+  }
+
+  if (turma) {
+    aluno.turma = turma;
+  }
+
+  res.json(aluno);
+});
+
+app.delete("/alunos/:id", (req, res) => {
+  const id = Number(req.params.id);
+
+  const alunoIndex = alunos.findIndex((aluno) => aluno.id === id);
+
+  if (alunoIndex === -1) {
+    return res.status(404).json({
+      message: "Aluno não encontrado"
+    });
+  }
+
+  alunos.splice(alunoIndex, 1);
+
+  res.json({
+    message: "Aluno removido com sucesso"
+  });
+});
+
 app.listen(port, () => {
   console.log(`Servidor rodando em http://localhost:${port}`);
 });
