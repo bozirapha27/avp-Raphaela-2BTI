@@ -1,4 +1,5 @@
 import express from "express";
+import "dotenv/config";
 
 const app = express();
 const port = 3000;
@@ -16,6 +17,19 @@ const alunos = [
   { id: 8, nome: "Fellype", turma: "2TIB" }
 ];
 
+function autenticar(req, res, next) {
+  const authHeader = req.headers.authorization;
+  const tokenSecreto = process.env.TOKEN_SECRETO;
+
+  if (authHeader !== `Bearer ${tokenSecreto}`) {
+    return res.status(401).json({
+      erro: "Acesso não autorizado. Token ausente ou inválido"
+    });
+  }
+
+  next();
+}
+
 app.get("/", (req, res) => {
   res.json({
     mensagem: "Servidor Express funcionando!",
@@ -24,7 +38,7 @@ app.get("/", (req, res) => {
   });
 });
 
-app.get("/alunos", (req, res) => {
+app.get("/alunos", autenticar, (req, res) => {
   res.json(alunos);
 });
 
@@ -42,7 +56,7 @@ app.get("/alunos/:id", (req, res) => {
   res.json(aluno);
 });
 
-app.post("/alunos", (req, res) => {
+app.post("/alunos", autenticar, (req, res) => {
   const novoAluno = {
     id: alunos.length + 1,
     nome: req.body.nome,
@@ -57,7 +71,7 @@ app.post("/alunos", (req, res) => {
   });
 });
 
-app.patch("/alunos/:id", (req, res) => {
+app.patch("/alunos/:id", autenticar, (req, res) => {
   const id = Number(req.params.id);
   const { nome, turma } = req.body;
 
@@ -80,7 +94,7 @@ app.patch("/alunos/:id", (req, res) => {
   res.json(aluno);
 });
 
-app.delete("/alunos/:id", (req, res) => {
+app.delete("/alunos/:id", autenticar, (req, res) => {
   const id = Number(req.params.id);
 
   const alunoIndex = alunos.findIndex((aluno) => aluno.id === id);
